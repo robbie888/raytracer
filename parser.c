@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <errno.h>
 
 //flags NOT IMPLETENTED BELOW YET
 //types
 #define SPHERE 0
 #define LIGHT 1
-#define INVALID_INPUT -2
+#define INVALID_INPUT -1
 
 void parser(const char *);
 void ignore_comments(FILE *f);
@@ -42,6 +43,7 @@ void parser(const char *filename)
     if (f == NULL)
     {
         fprintf(stderr, "Could not open file: %s\n", filename);
+        perror("");
         exit(1);
     }
 
@@ -56,7 +58,7 @@ void parser(const char *filename)
         {
             case -1:
                 fprintf(stderr, "Invalid input file.\n");
-                exit(-1);
+                exit(1);
                 break;
             case 0:
                 file_end = 0;
@@ -86,89 +88,28 @@ void parser(const char *filename)
 //0 = sphere
 //1 = light
 //2 = camera (or eye) position
-//
-int get_object_type1(FILE *f)
-{
-    //attempt to get first string, which should be the name of the object.
-    int buffer_size = 15;
-    char buffer[buffer_size];
-    //fscanf()
-    char c;
-    int i = 0;
-    while ((c = fgetc(f)) != EOF)
-    {
-        //printf("%c", c);
-        if (i == buffer_size-1) //buffer exceeded
-        {
-            fprintf(stderr, "Invalid input, object name too long\n");
-            return -1;
-        }
-        c = tolower(c);
-        if (c == '#')
-        {
-            ignore_comments(f);
-            i = 0;
-        }
-        else if (c >= 'a' && c <='z' )
-        {
-            buffer[i] = c;
-            i++;
-        }
-        else if (c == ',') //terminate field
-        {
-            break;
-        }
-        else if ((c == ' ' || c == '\n') && i == 0) //ignore leading whitespaces and blank lines
-        {
-
-            continue;
-        }
-        else if ((c == ' ' || c == '\n') && i != 0) //new line or space found after word, end loop and test
-        {
-            break;
-        }
-        else //char not expected
-        {
-            fprintf(stderr, "Invalid input, object name - unexpected char \"%c\"\n", c);
-            return -1;
-        }
-    }
-    if (c == EOF && i == 0)
-    {
-        //end of file, no more objects
-        return 0;
-    }
-    //add string termination
-    buffer[i] = '\0';
-    //test string against input options
-    if (strcmp(buffer, "sphere") == 0)
-    {
-        return 1;
-    }
-    else if (strcmp(buffer, "light") == 0)
-    {
-        return 2;
-    }
-    else
-    {
-        fprintf(stderr, "Unknown type: \"%s\"\n", buffer);
-        return -1;
-    }
-
-}
-
 int get_object_type(FILE *f)
 {
     char buffer[15];
+    char c;
+    //remove leading white spaces and count lines
+    while ((c = fgetc(f)) == ' ' || c == '\t' || c == '\r' || c == '\n')
+    {
+        if (c == '\n')
+        {
+            LINENUM++;
+        }
+    }
+    ungetc(c, f); //unget last char that was not whitespace.
     int scan_status = fscanf(f, " %14[^, \n]s", buffer);
+    //printf("String length is %ld\n", strlen(buffer));
     if ( scan_status == EOF )
     {
         return 0; //end of file reached.
-
     }
     else if (scan_status != 1)
     {
-        printf("Error, unknown object type. Line: %d", LINENUM);
+        fprintf(stderr, "Line: %d Error: unknown object type: %s", LINENUM, buffer);
         return -1;
     }
     //scanf succesful, test for comments.
@@ -188,7 +129,7 @@ int get_object_type(FILE *f)
     }
     else
     {
-        fprintf(stderr, "Unknown type: \"%s\"\n", buffer);
+        fprintf(stderr, "Line: %d Unknown type: \"%s\"\n", LINENUM, buffer);
         return -1;
     }
     return 0;
@@ -196,7 +137,7 @@ int get_object_type(FILE *f)
 
 //moves the file pointer to the spot before the next element after the token
 //removes any white spaces before and after the token
-//essentially fgetc will get you the next valid input after the token.
+//essentially it will get you the next valid input after the token.
 int next_element(FILE *f, char token)
 {
     char c;
@@ -215,7 +156,9 @@ int next_element(FILE *f, char token)
         //file pointer should now be at start of next data
         return 1;
     }
-    //unknown char, move pointer back and process error.
+    //unknown char, print error and exit.
+    fprintf(stderr, "Line: %d Unexpected token\nInvalid file.\n", LINENUM);
+    exit(1);
     return 0;
 }
 
@@ -227,7 +170,8 @@ void read_double_array(FILE *f, double *arr)
         if (fscanf(f, "%lf", &arr[i]) != 1) // read in float/double
         {
             //invalid file!
-            printf("Invalid file: incorrect formatting of array\n");
+            fprintf(stderr, "Line: %d Invalid file: incorrect formatting of array\n", LINENUM);
+            exit(1);
         }
         //printf("Your double is: %lf\n", arr[i]);
         if (i != 2)
@@ -244,7 +188,8 @@ void read_double(FILE *f, double *num)
     if (fscanf(f, "%lf", num) != 1) // read in float/double
     {
         //invalid file!
-        printf("Invalid file: incorrect formatting of double\n");
+        fprintf(stderr, "Line: %d Invalid file: incorrect formatting of double\n", LINENUM);
+        exit(1);
     }
 }
 
@@ -253,7 +198,8 @@ void read_int(FILE *f, int *num)
     if (fscanf(f, "%d", num) != 1) // read in float/double
     {
         //invalid file!
-        printf("Invalid file: incorrect formatting of int\n");
+        fprintf(stderr, "Line %d Invalid file: incorrect formatting of int\n", LINENUM);
+        exit(1);
     }
 }
 
@@ -275,6 +221,8 @@ void read_sphere_object(FILE *f)
     next_element(f, ',');
     read_double(f, &reflective);
 
+    //create sphere object here and add to array
+
     printf("Location is: %0.2lf %0.2lf %0.2lf\n", location[0], location[1], location[2]);
     printf("Colour is: %0.2lf %0.2lf %0.2lf\n", colour[0], colour[1], colour[2]);
     printf("Radius is: %0.2lf\n", radius);
@@ -295,6 +243,8 @@ void read_light_object(FILE *f)
     read_double_array(f, location);
     next_element(f, ',');
     read_double(f, &intensity);
+
+    //create light object here and add to array
 
     printf("Location is: %0.2lf %0.2lf %0.2lf\n", location[0], location[1], location[2]);
     printf("Type is: %d\n", type);
