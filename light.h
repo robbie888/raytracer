@@ -8,7 +8,7 @@
 
 //struct for light
 typedef struct light {
-    int type; //point =1 , directional =2 , ambient =0
+    int type; //ambient =0, position =1 , direction =2
     double intensity;
     vec3 location;
 } light;

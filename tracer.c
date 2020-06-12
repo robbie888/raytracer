@@ -21,7 +21,7 @@ double T_MIN = 1; //indicates distance between eye and viewport to stop redering
 double T_MAX = INFINITY; //max accepted value for ray hit
 
 //spheres list pointer and qty
-sphere *spheres = NULL;
+primative *spheres = NULL;
 int spheres_size = 0;
 
 //lights list pointer and qty
@@ -51,7 +51,7 @@ void init_object_lists(void)
 {
     //allocate memory to each sphere and initialise
     int qty = 5;
-    spheres = (sphere *) calloc(qty, sizeof(sphere));
+    spheres = (primative *) calloc(qty, sizeof(primative));
     init_sphere(&spheres[0], newVec3(0, -1, 3), newVec3(1,0,0), 1, 400, 0.2);
     init_sphere(&spheres[1], newVec3(2, 0, 3), newVec3(0,1,0), 1, 10, 0.3);
     init_sphere(&spheres[2], newVec3(-2, 0, 3), newVec3(0,0,1), 1, 500, 0.4);
@@ -149,7 +149,7 @@ void raytrace(void)
 vec3 colour(Ray *ray, int depth, double t_min, double t_max)
 {
     //get pointer to the closest sphere hit by ray, if any.
-    sphere *closest_sphere = ClosestIntersection(ray, t_min, t_max);
+    primative *closest_sphere = ClosestIntersection(ray, t_min, t_max);
     vec3 local_colour;
     if (closest_sphere != NULL)
     {
@@ -193,10 +193,10 @@ vec3 colour(Ray *ray, int depth, double t_min, double t_max)
 
 //determine if ray hits any objects or in this case spheres.
 //returns a pointer to the object hit or NULL if nothing hit.
-sphere *ClosestIntersection(Ray *ray, double t_min, double t_max)
+primative *ClosestIntersection(Ray *ray, double t_min, double t_max)
 {
     double closest_t = INFINITY;
-    sphere *closest_sphere = NULL;
+    primative *closest_sphere = NULL;
 
     //traverse list of spheres
     for (int i = 0; i < spheres_size; i++)
@@ -246,7 +246,7 @@ double ComputeLighting(vec3 *P, vec3 *N, vec3 *V, double s)
             //shadow check
             //build new ray and check if any intesections between ray and light.
             Ray r = {newVec3(P->x, P->y, P->z), newVec3(L.x, L.y, L.z)};
-            sphere *shadow_sphere = ClosestIntersection(&r, 0.001, T_MAX);
+            primative *shadow_sphere = ClosestIntersection(&r, 0.001, T_MAX);
             if (shadow_sphere != NULL)
             {
                 continue;
