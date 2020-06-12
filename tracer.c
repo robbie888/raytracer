@@ -30,7 +30,7 @@ int lights_size = 0;
 
 int main(void)
 {
-    //initialise the vec3 image array, set to 0s as precausion. 
+    //initialise the vec3 image array, set to 0s as precausion.
     image = (vec3 *) calloc(width *A_DEPTH * height * A_DEPTH, sizeof(vec3));
     //initialise spheres array
     init_object_lists();
@@ -62,9 +62,9 @@ void init_object_lists(void)
     //allocate memory to each light and initialise
     qty = 3;
     lights = (light *) calloc(qty, sizeof(light));
-    init_light(&lights[0], 0, newVec3(0,0,0), 0.2);
-    init_light(&lights[1], 1, newVec3(2,3,0), 0.6);
-    init_light(&lights[2], 2, newVec3(1,4,4), 0.2);
+    init_light(&lights[0], AMBIENT, newVec3(0,0,0), 0.2);
+    init_light(&lights[1], POSITION, newVec3(2,3,0), 0.6);
+    init_light(&lights[2], DIRECTION, newVec3(1,4,4), 0.2);
     lights_size = qty;
 
 }
@@ -229,13 +229,13 @@ double ComputeLighting(vec3 *P, vec3 *N, vec3 *V, double s)
     //travese lights and calculate lighting for each type.
     for (int j = 0; j < lights_size; j++)
     {
-        if (lights[j].type == 0) //ambient light
+        if (lights[j].type == AMBIENT) //ambient light
         {
             i += lights[j].intensity;
         }
         else
         {
-            if (lights[j].type == 1) //position light
+            if (lights[j].type == POSITION) //position light
             {
                 VSUBV(L, lights[j].location, (*P));
             }
@@ -313,54 +313,4 @@ void write_ppm(vec3 *image_file, char file_name[])
 
     //close file
     fclose(f);
-}
-
-//initialise a sphere struct in pointer s.
-//Returns initialised sphere as well.
-sphere *init_sphere(sphere *s, vec3 loc, vec3 col, double rad, int spec, double refl)
-{
-    s->colour = col;
-    s->location = loc;
-    s->radius = rad;
-    s->specular = spec;
-    s->reflective = refl;
-    s->is_hit = &is_hit_sphere;
-
-    return s;
-}
-
-//initialise a light variable in pointer l.
-//Returns initialised struct as well.
-light *init_light(light *l, int type, vec3 loc, double intensity)
-{
-    l->type = type; //point, directional, ambient
-    l->intensity = intensity;
-    l->location = loc;
-    return l;
-}
-
-//maths for calculating if ray r hits sphere s.
-bool is_hit_sphere(sphere *s, Ray *r)
-{
-    vec3 oc;
-    double a, b, c, discriminant;
-
-    VSUBV(oc, r->origin, s->location);
-    a = DOT(r->direction, r->direction);
-    b = 2.0 * DOT(oc, r->direction);
-    c = DOT(oc, oc) - (s->radius * s->radius);
-    discriminant = b*b - 4.0*a*c;
-
-    if (discriminant < 0)
-    {
-        return false;
-    }
-    else
-    {
-        discriminant = sqrt(discriminant);
-        s->t1 = (-b + discriminant) / (2.0*a);
-        s->t2 = (-b - discriminant) / (2.0*a);
-        s->hit_point = MIN(s->t1, s->t2);
-        return true;
-    }
 }

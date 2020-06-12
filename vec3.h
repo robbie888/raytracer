@@ -8,7 +8,8 @@
 
 //IF USING THE MACROS WITH vec3 POINTERS AS ARGUMENTS, REMEMBER TO PUT THEM IN BRACKETS AND INCLUDE THE * e.g (*vptr).
 //SEE THE unit_vector FUNCTION FOR AN EXAMPLE.
-
+#ifndef __VEC_3_H__
+#define __VEC_3_H__
 #include <math.h>
 #include <stdio.h>
 
@@ -98,3 +99,5 @@ void printVec3(vec3 *);
 
 //returns new vec3 of values x, y, z on the stack
 vec3 newVec3(double x, double y, double z);
+
+#endif
