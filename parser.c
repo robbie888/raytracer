@@ -20,6 +20,7 @@ int next_element(FILE *f, char token);
 void read_double(FILE *f, double *num);
 void read_int(FILE *f, int *num);
 void read_double_array(FILE *f, double *arr);
+void str_to_lower(char* s);
 
 //global variables
 int LINENUM = 1; //track line number
@@ -101,7 +102,7 @@ int get_object_type(FILE *f)
         }
     }
     ungetc(c, f); //unget last char that was not whitespace.
-    int scan_status = fscanf(f, " %14[^, \n]s", buffer);
+    int scan_status = fscanf(f, " %14[^, \n\r]s", buffer);
     //printf("String length is %ld\n", strlen(buffer));
     if ( scan_status == EOF )
     {
@@ -112,12 +113,18 @@ int get_object_type(FILE *f)
         fprintf(stderr, "Line: %d Error: unknown object type: %s", LINENUM, buffer);
         return -1;
     }
-    //scanf succesful, test for comments.
+
+    //scanf succesful
+    //test for comments.
     if (buffer[0] == '#')
     {
         ignore_comments(f); //ignore up to new line or EOF.
         return -2;
     }
+
+    //convert to lowercase
+    str_to_lower(buffer);
+
     //test for object type
     if (strcmp(buffer, "sphere") == 0)
     {
@@ -162,18 +169,15 @@ int next_element(FILE *f, char token)
     return 0;
 }
 
+//reads an array of len 3 from file f, formatted as [double,double,double]
+//puts data into arr, arr must have enough space.
 void read_double_array(FILE *f, double *arr)
 {
     next_element(f, '[');
     for (int i = 0; i < 3; i++)
     {
-        if (fscanf(f, "%lf", &arr[i]) != 1) // read in float/double
-        {
-            //invalid file!
-            fprintf(stderr, "Line: %d Invalid file: incorrect formatting of array\n", LINENUM);
-            exit(1);
-        }
-        //printf("Your double is: %lf\n", arr[i]);
+        read_double(f, &arr[i]);
+        //check for dividing token, ','
         if (i != 2)
         {
             next_element(f, ',');
@@ -183,6 +187,7 @@ void read_double_array(FILE *f, double *arr)
     next_element(f, ']');
 }
 
+//reads a double from file f. Exits if fails.
 void read_double(FILE *f, double *num)
 {
     if (fscanf(f, "%lf", num) != 1) // read in float/double
@@ -193,6 +198,7 @@ void read_double(FILE *f, double *num)
     }
 }
 
+//reads an int from file f. Exists if fails.
 void read_int(FILE *f, int *num)
 {
     if (fscanf(f, "%d", num) != 1) // read in float/double
@@ -203,6 +209,7 @@ void read_int(FILE *f, int *num)
     }
 }
 
+//reads in a sphere from file f and creates the object as a type primative
 void read_sphere_object(FILE *f)
 {
     double location[3];
@@ -231,6 +238,7 @@ void read_sphere_object(FILE *f)
 
 }
 
+//reads in a light from file f and creates the object as a type light
 void read_light_object(FILE *f)
 {
     double location[3];
@@ -252,14 +260,28 @@ void read_light_object(FILE *f)
 
 }
 
+//reads chars from file, ignoring them until a new line char is reached.
 void ignore_comments(FILE *f)
 {
-    //printf("Removing comments...");
     char c;
+    //bypass entire line after comment token '#'
     while ((c = fgetc(f)) != EOF && c != '\n')
     {
-        //bypass entire line after comment token '#'
+        //ignoring line
     }
-    //printf("Newline found\n");
+
     LINENUM++;
+}
+
+//convert a string to lower case
+void str_to_lower(char* s)
+{
+    // for(int i = 0; s[i] != '\0'; i++)
+    // {
+    //     s[i] = tolower(s[i]);
+    // }
+    for (;*s != '\0'; s++)
+    {
+        *s = tolower(*s);
+    }
 }
