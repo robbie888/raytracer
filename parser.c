@@ -1,42 +1,38 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include <errno.h>
-
+#include "parser.h"
+#include "primative.h"
+#include "light.h"
 //flags NOT IMPLETENTED BELOW YET
 //types
 #define SPHERE 0
 #define LIGHT 1
 #define INVALID_INPUT -1
 
-void parser(const char *);
-void ignore_comments(FILE *f);
-int get_object_type(FILE *f);
-void read_sphere_object(FILE *f);
-void read_light_object(FILE *f);
-
-int next_element(FILE *f, char token);
-void read_double(FILE *f, double *num);
-void read_int(FILE *f, int *num);
-void read_double_array(FILE *f, double *arr);
-void str_to_lower(char* s);
-
 //global variables
 int LINENUM = 1; //track line number
 
-int main(int argc, char const *argv[]) {
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage ./parser <input_file>\n");
-        exit(-1);
-    }
-    printf("Argument: %s\n", argv[1]);
+//*****EXTERNAL VARIABLES
+//THESE ARE FROM TRACER.C TO BUILD ARRAYS OF OBJECTS IN THE SCENE
+//spheres list pointer and qty
+extern primative *spheres;
+extern int spheres_size;
 
-    parser(argv[1]);
+//lights list pointer and qty
+extern light *lights;
+extern int lights_size;
+//*****END OF EXTERNAL VARIABLES
 
-    return 0;
-}
+// int main(int argc, char const *argv[]) {
+//     if (argc != 2)
+//     {
+//         fprintf(stderr, "Usage ./parser <input_file>\n");
+//         exit(-1);
+//     }
+//     printf("Argument: %s\n", argv[1]);
+//
+//     parser(argv[1]);
+//
+//     return 0;
+// }
 
 void parser(const char *filename)
 {
@@ -47,7 +43,6 @@ void parser(const char *filename)
         perror("");
         exit(1);
     }
-
     //char c;
     //attempt to get first object type
     int file_end = 1;
@@ -65,11 +60,11 @@ void parser(const char *filename)
                 file_end = 0;
                 break;
             case 1:
-                printf("Reading sphere...\n");
+                //printf("Reading sphere...\n");
                 read_sphere_object(f);
                 break;
             case 2:
-                printf("Reading light...\n");
+                //printf("Reading light...\n");
                 read_light_object(f);
                 break;
             default:
@@ -229,12 +224,16 @@ void read_sphere_object(FILE *f)
     read_double(f, &reflective);
 
     //create sphere object here and add to array
-
-    printf("Location is: %0.2lf %0.2lf %0.2lf\n", location[0], location[1], location[2]);
-    printf("Colour is: %0.2lf %0.2lf %0.2lf\n", colour[0], colour[1], colour[2]);
-    printf("Radius is: %0.2lf\n", radius);
-    printf("Specular is: %d\n", specular);
-    printf("Reflective is: %0.2lf\n", reflective);
+    spheres = (primative *) realloc(spheres, sizeof(primative) * ++spheres_size);
+    init_sphere(&spheres[spheres_size - 1],
+            newVec3(location[0], location[1], location[2]),
+            newVec3(colour[0], colour[1], colour[2]),
+            radius, specular, reflective);
+    // printf("Location is: %0.2lf %0.2lf %0.2lf\n", location[0], location[1], location[2]);
+    // printf("Colour is: %0.2lf %0.2lf %0.2lf\n", colour[0], colour[1], colour[2]);
+    // printf("Radius is: %0.2lf\n", radius);
+    // printf("Specular is: %d\n", specular);
+    // printf("Reflective is: %0.2lf\n", reflective);
 
 }
 
@@ -253,10 +252,14 @@ void read_light_object(FILE *f)
     read_double(f, &intensity);
 
     //create light object here and add to array
-
-    printf("Location is: %0.2lf %0.2lf %0.2lf\n", location[0], location[1], location[2]);
-    printf("Type is: %d\n", type);
-    printf("intensity is: %0.2lf\n", intensity);
+    lights = (light *) realloc(lights, sizeof(light) * ++lights_size);
+    init_light(&lights[lights_size - 1],
+            type,
+            newVec3(location[0], location[1], location[2]),
+            intensity);
+    // printf("Location is: %0.2lf %0.2lf %0.2lf\n", location[0], location[1], location[2]);
+    // printf("Type is: %d\n", type);
+    // printf("intensity is: %0.2lf\n", intensity);
 
 }
 
