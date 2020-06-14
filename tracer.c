@@ -49,23 +49,27 @@ int main(void)
 
 void init_object_lists(void)
 {
+    //initiate parser and allocate memory to lights and spheres arrays accordingly. 
+    parser("default_scene_file.txt");
+
+    //below is the default scene, maybe can be used if not scene file given?
     //allocate memory to each sphere and initialise
-    int qty = 5;
-    spheres = (primative *) calloc(qty, sizeof(primative));
-    init_sphere(&spheres[0], newVec3(0, -1, 3), newVec3(1,0,0), 1, 400, 0.2);
-    init_sphere(&spheres[1], newVec3(2, 0, 3), newVec3(0,1,0), 1, 10, 0.3);
-    init_sphere(&spheres[2], newVec3(-2, 0, 3), newVec3(0,0,1), 1, 500, 0.4);
-    init_sphere(&spheres[3], newVec3(0, 1, 7), newVec3(0.6666,0.6628,0.6784), 2, 10, 0.5);
-    init_sphere(&spheres[4], newVec3(0, -5001, 0), newVec3(1,1,0), 5000, 10, 0);
-    spheres_size = qty;
+    // int qty = 5;
+    // spheres = (primative *) calloc(qty, sizeof(primative));
+    // init_sphere(&spheres[0], newVec3(0, -1, 3), newVec3(1,0,0), 1, 400, 0.2);
+    // init_sphere(&spheres[1], newVec3(2, 0, 3), newVec3(0,1,0), 1, 10, 0.3);
+    // init_sphere(&spheres[2], newVec3(-2, 0, 3), newVec3(0,0,1), 1, 500, 0.4);
+    // init_sphere(&spheres[3], newVec3(0, 1, 7), newVec3(0.6666,0.6628,0.6784), 2, 10, 0.5);
+    // init_sphere(&spheres[4], newVec3(0, -5001, 0), newVec3(1,1,0), 5000, 10, 0);
+    // spheres_size = qty;
 
     //allocate memory to each light and initialise
-    qty = 3;
-    lights = (light *) calloc(qty, sizeof(light));
-    init_light(&lights[0], AMBIENT, newVec3(0,0,0), 0.2);
-    init_light(&lights[1], POSITION, newVec3(2,3,0), 0.6);
-    init_light(&lights[2], DIRECTION, newVec3(1,4,4), 0.2);
-    lights_size = qty;
+    // int qty = 3;
+    // lights = (light *) calloc(qty, sizeof(light));
+    // init_light(&lights[0], AMBIENT, newVec3(0,0,0), 0.2);
+    // init_light(&lights[1], POSITION, newVec3(2,3,0), 0.6);
+    // init_light(&lights[2], DIRECTION, newVec3(1,4,4), 0.2);
+    // lights_size = qty;
 
 }
 
@@ -291,7 +295,7 @@ void write_ppm(vec3 *image_file, char file_name[])
     FILE *f = fopen(file_name, "w");
     if (f == NULL)
     {
-        fprintf(stderr, "Cannot write file: %s", file_name);
+        fprintf(stderr, "Cannot write file: %s\n", file_name);
         exit(-1);
     }
 

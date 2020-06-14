@@ -5,6 +5,7 @@
 #include "ray.h"
 #include "primative.h"
 #include "light.h"
+#include "parser.h"
 
 //return smallest of two values a & b
 #define MIN(a, b) ((a) > (b) ? (b) : (a))

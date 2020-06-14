@@ -1,0 +1,11 @@
+#spheres: sphere, location [x,y,z], colour [r,g,b], size, specular, reflective
+sphere, [0, -1, 3], [1,0,0], 1, 400, 0.2
+sphere, [2, 0, 3], [0,1,0], 1, 10, 0.3
+sphere, [-2, 0, 3], [0,0,1], 1, 500, 0.4
+sphere, [0, 1, 7], [0.6666,0.6628,0.6784], 2, 10, 0.5
+sphere, [0, -5001, 0], [1,1,0], 5000, 10, 0
+
+#lights: light, type 0 1 or 2, location, intensity
+light, 0, [0,0,0], 0.2
+light, 1, [2,3,0], 0.6
+LighT, 2, [1,4,4], 0.2
