@@ -19,6 +19,10 @@ extern int spheres_size;
 //lights list pointer and qty
 extern light *lights;
 extern int lights_size;
+
+//image size
+extern int width;
+extern int height;
 //*****END OF EXTERNAL VARIABLES
 
 // int main(int argc, char const *argv[]) {
@@ -43,6 +47,7 @@ void parser(const char *filename)
         perror("");
         exit(1);
     }
+    //printf("Opened file %s\n", filename);
     //char c;
     //attempt to get first object type
     int file_end = 1;
@@ -67,6 +72,10 @@ void parser(const char *filename)
                 //printf("Reading light...\n");
                 read_light_object(f);
                 break;
+            case 3:
+                    //printf("Reading image size...\n");
+                    read_image_size(f);
+                    break;
             default:
                 break;
                 //fprintf(stderr, "Unknown error...\n");
@@ -128,6 +137,10 @@ int get_object_type(FILE *f)
     else if (strcmp(buffer, "light") == 0)
     {
         return 2;
+    }
+    else if (strcmp(buffer, "size") == 0)
+    {
+        return 3;
     }
     else
     {
@@ -261,6 +274,30 @@ void read_light_object(FILE *f)
     // printf("Type is: %d\n", type);
     // printf("intensity is: %0.2lf\n", intensity);
 
+}
+
+//reads in the image size from file, set's variables accordingly
+void read_image_size(FILE *f)
+{
+    int width_tmp = 0;
+    int height_tmp = 0;
+    next_element(f, ',');
+    read_int(f, &width_tmp);
+    next_element(f, ',');
+    read_int(f, &height_tmp);
+
+    if (width_tmp >= 0 && height_tmp >= 0)
+    {
+        printf("Image size: width: %d, height: %d\n", width_tmp, height_tmp);
+        //set varibles
+        width = width_tmp;
+        height = height_tmp;
+    }
+    else
+    {
+        fprintf(stderr, "Error: invalid image size given: %d x %d\n", width_tmp, height_tmp);
+        fprintf(stderr, "Using default image size: %d x %d\n", width, height);
+    }
 }
 
 //reads chars from file, ignoring them until a new line char is reached.

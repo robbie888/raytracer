@@ -16,4 +16,4 @@ void raytrace(void);
 vec3 colour(Ray *ray, int depth, double t_min, double t_max);
 double ComputeLighting(vec3 *P, vec3 *N, vec3 *V, double s);
 primative *ClosestIntersection(Ray *ray, double t_min, double t_max);
-void init_object_lists(void);
+void init_object_lists(char *);

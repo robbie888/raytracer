@@ -28,30 +28,47 @@ int spheres_size = 0;
 light *lights = NULL;
 int lights_size = 0;
 
-int main(void)
-{
-    //initialise the vec3 image array, set to 0s as precausion.
-    image = (vec3 *) calloc(width *A_DEPTH * height * A_DEPTH, sizeof(vec3));
-    //initialise spheres array
-    init_object_lists();
+char* output_file = "output.ppm";
 
+int main(int argc, char *argv[])
+{
+    if (argc != 2)
+    {
+         fprintf(stderr, "Usage %s <input_file>\n", argv[0]);
+         exit(-1);
+    }
+    printf("Scene file: %s\n", argv[1]);
+
+    //read in scene file, initialise spheres array
+    init_object_lists(argv[1]);
+
+    //initialise the vec3 image array, set to 0s as precausion.
+    image = (vec3 *) calloc( width * A_DEPTH * height * A_DEPTH, sizeof(vec3));
+    if (image == NULL)
+    {
+        fprintf(stderr, "Error: Could not allocate memory for image\n");
+        exit(1);
+    }
     //raytracer run
+    printf("Running ray tracer...\n");
     raytrace();
 
     //write the image to a file
-    write_ppm(image, "output.ppm");
+    printf("Writing output file to: %s\n", output_file);
+    write_ppm(image, output_file);
 
     //clean-up - free allocated memory
     free(image);
     free(spheres);
     free(lights);
+    printf("Done!\n");
 }
 
-void init_object_lists(void)
+void init_object_lists(char *s)
 {
-    //initiate parser and allocate memory to lights and spheres arrays accordingly. 
-    parser("default_scene_file.txt");
-
+    //initiate parser and allocate memory to lights and spheres arrays accordingly.
+    parser(s);
+    printf("Building Scene of...\n\t%d Primatives\n\t%d Lights\n", spheres_size, lights_size);
     //below is the default scene, maybe can be used if not scene file given?
     //allocate memory to each sphere and initialise
     // int qty = 5;
@@ -62,9 +79,9 @@ void init_object_lists(void)
     // init_sphere(&spheres[3], newVec3(0, 1, 7), newVec3(0.6666,0.6628,0.6784), 2, 10, 0.5);
     // init_sphere(&spheres[4], newVec3(0, -5001, 0), newVec3(1,1,0), 5000, 10, 0);
     // spheres_size = qty;
-
-    //allocate memory to each light and initialise
-    // int qty = 3;
+    //
+    // //allocate memory to each light and initialise
+    // qty = 3;
     // lights = (light *) calloc(qty, sizeof(light));
     // init_light(&lights[0], AMBIENT, newVec3(0,0,0), 0.2);
     // init_light(&lights[1], POSITION, newVec3(2,3,0), 0.6);
@@ -88,6 +105,7 @@ void raytrace(void)
     double viewpoint_ratio = (double) width / (double) height;
     vec3 viewpoint = {1.0 *viewpoint_ratio, 1, 1};
     vec3 *currpix = image;
+
     for (int j = height / 2; j > -height / 2; j--)
     {
         for (int i = -width / 2; i < width / 2; i++)

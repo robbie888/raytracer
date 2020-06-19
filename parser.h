@@ -12,6 +12,7 @@ void ignore_comments(FILE *f);
 int get_object_type(FILE *f);
 void read_sphere_object(FILE *f);
 void read_light_object(FILE *f);
+void read_image_size(FILE *f);
 
 int next_element(FILE *f, char token);
 void read_double(FILE *f, double *num);
