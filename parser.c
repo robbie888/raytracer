@@ -25,19 +25,6 @@ extern int width;
 extern int height;
 //*****END OF EXTERNAL VARIABLES
 
-// int main(int argc, char const *argv[]) {
-//     if (argc != 2)
-//     {
-//         fprintf(stderr, "Usage ./parser <input_file>\n");
-//         exit(-1);
-//     }
-//     printf("Argument: %s\n", argv[1]);
-//
-//     parser(argv[1]);
-//
-//     return 0;
-// }
-
 void parser(const char *filename)
 {
     FILE *f = fopen(filename, "r");
@@ -106,8 +93,10 @@ int get_object_type(FILE *f)
         }
     }
     ungetc(c, f); //unget last char that was not whitespace.
+
+    //read in the object string, note the amount of chars read below is buffer-1
     int scan_status = fscanf(f, " %14[^, \n\r]s", buffer);
-    //printf("String length is %ld\n", strlen(buffer));
+
     if ( scan_status == EOF )
     {
         return 0; //end of file reached.
@@ -144,7 +133,7 @@ int get_object_type(FILE *f)
     }
     else
     {
-        fprintf(stderr, "Line: %d Unknown type: \"%s\"\n", LINENUM, buffer);
+        fprintf(stderr, "Line: %d Unknown type or unexcepted input: \"%s\"\n", LINENUM, buffer);
         return -1;
     }
     return 0;
@@ -157,13 +146,13 @@ int next_element(FILE *f, char token)
 {
     char c;
     //remove white spaces
-    while ((c = fgetc(f)) == ' ') //should remove tabs too...
+    while ((c = fgetc(f)) == ' ' || c == '\t')
     {
         //remove spaces
     }
     if (c == token)//check token
     {
-        while ((c = fgetc(f)) == ' ')//tabs??
+        while ((c = fgetc(f)) == ' ' || c == '\t')
         {
             //remove spaces after token
         }
@@ -242,6 +231,8 @@ void read_sphere_object(FILE *f)
             newVec3(location[0], location[1], location[2]),
             newVec3(colour[0], colour[1], colour[2]),
             radius, specular, reflective);
+
+    //DEBUGGING - OUTPUT TO STDOUT
     // printf("Location is: %0.2lf %0.2lf %0.2lf\n", location[0], location[1], location[2]);
     // printf("Colour is: %0.2lf %0.2lf %0.2lf\n", colour[0], colour[1], colour[2]);
     // printf("Radius is: %0.2lf\n", radius);
@@ -270,6 +261,8 @@ void read_light_object(FILE *f)
             type,
             newVec3(location[0], location[1], location[2]),
             intensity);
+
+    //DEBUGGING - OUTPUT TO STDOUT
     // printf("Location is: %0.2lf %0.2lf %0.2lf\n", location[0], location[1], location[2]);
     // printf("Type is: %d\n", type);
     // printf("intensity is: %0.2lf\n", intensity);
@@ -325,3 +318,18 @@ void str_to_lower(char* s)
         *s = tolower(*s);
     }
 }
+
+//*****MAIN FUNCTION FOR TESTING / DEBUGGING*****//
+
+// int main(int argc, char const *argv[]) {
+//     if (argc != 2)
+//     {
+//         fprintf(stderr, "Usage ./parser <input_file>\n");
+//         exit(-1);
+//     }
+//     printf("Argument: %s\n", argv[1]);
+//
+//     parser(argv[1]);
+//
+//     return 0;
+// }
