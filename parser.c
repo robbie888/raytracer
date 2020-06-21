@@ -34,13 +34,11 @@ void parser(const char *filename)
         perror("");
         exit(1);
     }
-    //printf("Opened file %s\n", filename);
-    //char c;
+
     //attempt to get first object type
     int file_end = 1;
     while(file_end) //check end of file
     {
-        //fseek(f, -1, SEEK_CUR); //move pointer back one.
         int type = get_object_type(f); //start reading in object
         switch ( type )
         {
@@ -77,9 +75,9 @@ void parser(const char *filename)
 }
 
 //returns int of the object type to be read in
-//0 = sphere
-//1 = light
-//2 = camera (or eye) position
+//1 = sphere
+//2 = light
+//3 = image size (height x width)
 int get_object_type(FILE *f)
 {
     char buffer[15];
